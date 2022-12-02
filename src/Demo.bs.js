@@ -2,7 +2,9 @@
 'use strict';
 
 var Fs = require("fs");
-var Caml_array = require("rescript/lib/js/caml_array.js");
+var $$Array = require("rescript/lib/js/array.js");
+var $$String = require("rescript/lib/js/string.js");
+var Belt_Array = require("rescript/lib/js/belt_Array.js");
 var Caml_format = require("rescript/lib/js/caml_format.js");
 
 console.log("Hello, World!");
@@ -10,26 +12,53 @@ console.log("Hello, World!");
 var input = Fs.readFileSync("day1.txt", "utf8");
 
 function split_elves(str) {
-  var arr = str.split("\n\n");
+  var arr = $$String.trim(str).split("\n\n");
   console.log("Number of Elves: " + String(arr.length));
   return arr;
 }
 
 var elves = split_elves(input);
 
-function sum_calories(inp) {
-  return inp.split("\n").map(Caml_format.int_of_string).reduce((function (acc, v) {
+function sum(arr) {
+  return arr.reduce((function (acc, v) {
                 return acc + v | 0;
               }), 0);
 }
 
-var sum = sum_calories(Caml_array.get(elves, 0));
+var my_int_of_string = Caml_format.int_of_string;
 
-console.log("calories of first elf: " + String(sum) + "");
+function sum_calories(inp) {
+  return sum(inp.split("\n").map(my_int_of_string));
+}
+
+function max(arr) {
+  return Belt_Array.reduce(arr, 0, (function (max_v, v) {
+                return Math.max(max_v, v);
+              }));
+}
+
+var calories = Belt_Array.map(elves, sum_calories);
+
+var max_calories = max(Belt_Array.map(elves, sum_calories));
+
+console.log("maximum calories of elves: " + String(max_calories) + "");
+
+var top_3_calories = $$Array.sub(Belt_Array.map(elves, sum_calories).sort().reverse(), 0, 3);
+
+console.log("top 3 calories");
+
+console.log(top_3_calories);
+
+console.log("sum: " + String(sum(top_3_calories)) + "");
 
 exports.input = input;
 exports.split_elves = split_elves;
 exports.elves = elves;
-exports.sum_calories = sum_calories;
 exports.sum = sum;
+exports.my_int_of_string = my_int_of_string;
+exports.sum_calories = sum_calories;
+exports.max = max;
+exports.calories = calories;
+exports.max_calories = max_calories;
+exports.top_3_calories = top_3_calories;
 /*  Not a pure module */
