@@ -1,6 +1,6 @@
 Js.log("Hello, World!")
 
-let input = Node.Fs.readFileAsUtf8Sync("day1.txt")
+let input = Node.Fs.readFileAsUtf8Sync("day01.txt")
 
 let split_elves = (str: string) => {
   //  Js.log(str)

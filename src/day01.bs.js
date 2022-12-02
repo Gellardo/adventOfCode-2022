@@ -9,7 +9,7 @@ var Caml_format = require("rescript/lib/js/caml_format.js");
 
 console.log("Hello, World!");
 
-var input = Fs.readFileSync("day1.txt", "utf8");
+var input = Fs.readFileSync("day01.txt", "utf8");
 
 function split_elves(str) {
   var arr = $$String.trim(str).split("\n\n");

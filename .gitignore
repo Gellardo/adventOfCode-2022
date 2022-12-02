@@ -5,3 +5,6 @@
 .merlin
 
 .session
+*.iml
+.idea/
+package-lock.json
