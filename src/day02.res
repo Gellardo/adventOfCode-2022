@@ -36,19 +36,33 @@ let turn_of_string_p1 = s => {
     me: fields[1]->hand_of_char,
   }
 }
-let points = h =>
-  switch h {
+type outcome =
+  | Win
+  | Draw
+  | Loss
+let int_of_outcome = o =>
+  switch o {
+  | Win => 6
+  | Draw => 3
+  | Loss => 0
+  }
+let outcome_of_turn = t =>
+  switch t {
   | {opp: Rock, me: Paper}
   | {opp: Paper, me: Scissors}
-  | {opp: Scissors, me: Rock} => 6
+  | {opp: Scissors, me: Rock} =>
+    Win
   | {opp: Scissors, me: Paper}
   | {opp: Rock, me: Scissors}
-  | {opp: Paper, me: Rock} => 0
+  | {opp: Paper, me: Rock} =>
+    Loss
   | {opp: Scissors, me: Scissors}
   | {opp: Rock, me: Rock}
-  | {opp: Paper, me: Paper} => 3
+  | {opp: Paper, me: Paper} =>
+    Draw
   }
-let score = t => t.me->int_of_hand + t->points
+let score = t => t.me->int_of_hand + t->outcome_of_turn->int_of_outcome
+
 Js.log(
   `parse:A X -> ${turn_of_string_p1("A X")->string_of_turn}, score:${turn_of_string_p1("A X")
     ->score
@@ -58,10 +72,6 @@ let strategy = input->String.trim->Js_string2.split("\n")->Belt_Array.map(turn_o
 let sum = arr => arr->Js_array2.reduce((acc, v) => acc + v, 0)
 Js.log(`score of full strategy (part 1): ${strategy->Belt_Array.map(score)->sum->string_of_int}`)
 
-type outcome =
-  | Win
-  | Draw
-  | Loss
 let outcome_of_string = s =>
   switch s {
   | "Z" => Win
@@ -72,8 +82,7 @@ let outcome_of_string = s =>
 let turn_of_string_p2 = s => {
   let fields = s->Js_string2.split(" ")
   let opp: hand = fields[0]->hand_of_char
-  let result = fields[1]->outcome_of_string
-  let me: hand = switch (opp, result) {
+  let me: hand = switch (opp, fields[1]->outcome_of_string) {
   | (Rock, Draw) | (Scissors, Win) | (Paper, Loss) => Rock
   | (Rock, Win) | (Scissors, Loss) | (Paper, Draw) => Paper
   | (Rock, Loss) | (Scissors, Draw) | (Paper, Win) => Scissors
