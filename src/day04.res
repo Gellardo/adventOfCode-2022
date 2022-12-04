@@ -15,20 +15,20 @@ let parse_line = (line: string): (work, work) => {
 }
 let work_orders = lines->Js.Array2.map(parse_line)
 
+let or_any_order = (fn: ('t, 't) => bool): ((('t, 't)) => bool) => {
+  tup => {
+    let (elf1: 't, elf2: 't) = tup
+    fn(elf1, elf2) || fn(elf2, elf1)
+  }
+}
 let full_overlap = (elf1: work, elf2: work) => {
   elf1.min <= elf2.min && elf1.max >= elf2.max
 }
-let overlapped_orders = work_orders->Js.Array2.filter(t => {
-  let (elf1, elf2) = t
-  full_overlap(elf1, elf2) || full_overlap(elf2, elf1)
-})
+let overlapped_orders = work_orders->Js.Array2.filter(full_overlap->or_any_order)
 Js.log(`overlapping orders: ${overlapped_orders->Js.Array2.length->string_of_int}`)
 
 let partial_overlap = (elf1: work, elf2: work) => {
   elf1.min <= elf2.min && elf1.max >= elf2.min
 }
-let partial_overlapped_orders = work_orders->Js.Array2.filter(t => {
-  let (elf1, elf2) = t
-  partial_overlap(elf1, elf2) || partial_overlap(elf2, elf1)
-})
+let partial_overlapped_orders = work_orders->Js.Array2.filter(partial_overlap->or_any_order)
 Js.log(`partial overlapping orders: ${partial_overlapped_orders->Js.Array2.length->string_of_int}`)
