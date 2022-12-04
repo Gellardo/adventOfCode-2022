@@ -6,12 +6,15 @@ type work = {
   max: int,
 }
 let parse_line = (line: string): (work, work) => {
-  let [i1, i2, i3, i4] =
+  let ints =
     line
     ->Js_string2.splitByRe(Js.Re.fromString("[-,]"))
     ->Js.Array2.map(Js.Option.getExn)
     ->Js.Array2.map(int_of_string)
-  ({min: i1, max: i2}, {min: i3, max: i4})
+  switch ints {
+  | [i1, i2, i3, i4] => ({min: i1, max: i2}, {min: i3, max: i4})
+  | _ => failwith(`invalid line: ${line}`)
+  }
 }
 let work_orders = lines->Js.Array2.map(parse_line)
 
