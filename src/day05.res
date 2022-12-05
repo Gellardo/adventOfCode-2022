@@ -32,7 +32,7 @@ let transpose = (arr: array<array<container>>): yard => {
   let target = {
     let length = arrays[0]->Js.Array2.length
     let base = []
-    for _ in 0 to length {
+    for _ in 1 to length {
       let _ = base->Js.Array2.push([])
     }
     base
@@ -49,8 +49,10 @@ let transpose = (arr: array<array<container>>): yard => {
   })
   target
 }
+
+let yard_of_string = s => s->Js.String2.split("\n")->Js.Array2.map(parse_line)->transpose
 Js.log(start)
-let parsed_yard = start->Js.String2.split("\n")->Js.Array2.map(parse_line)->transpose
+let parsed_yard = start->yard_of_string
 Js.log(parsed_yard->string_of_yard)
 
 type instruction = {
@@ -83,17 +85,19 @@ let parsed_instructions =
 Js.log(parsed_instructions->Js.Array2.slice(~start=0, ~end_=3))
 
 let apply_instruction = (instruct: instruction, y: yard) => {
+  let from = instruct.from - 1
+  let to = instruct.to - 1
   for _ in 1 to instruct.num {
-    let c: container = switch y[instruct.from - 1]->Js.Array2.pop {
+    let c: container = switch y[from]->Js.Array2.pop {
     | None => failwith(`trying to pull from ${instruct.from->string_of_int}, but there is nothing`)
     | Some(c) => c
     }
-    let _ = y[instruct.to - 1]->Js.Array2.push(c)
+    let _ = y[to]->Js.Array2.push(c)
   }
   y
 }
 //Js.log(parsed_yard->string_of_yard)
-//Js.log(apply_instruction(parsed_instructions[0]->Js.Option.getExn, parsed_yard)->string_of_yard)
+//Js.log(apply_instruction(parsed_instructions[0], parsed_yard)->string_of_yard)
 
 let final_yard =
   parsed_instructions->Js.Array2.reduce((y, instr) => apply_instruction(instr, y), parsed_yard)
@@ -110,24 +114,25 @@ let top_of_yard = (y: yard) => {
   })
   ->Js.Array2.joinWith("")
 }
-Js.log(final_yard->top_of_yard)
+Js.log("Part 1: " ++ final_yard->top_of_yard)
 
 // Have to reparse since applying instructions mutates the yard
-let parsed_yard = start->Js.String2.split("\n")->Js.Array2.map(parse_line)->transpose
+let parsed_yard = start->yard_of_string
 
 let apply_instruction_9001 = (instruct: instruction, y: yard) => {
-  Js.Array2.slice
-  for _ in 1 to instruct.num {
-    let c: container = switch y[instruct.from - 1]->Js.Array2.pop {
-    | None => failwith(`trying to pull from ${instruct.from->string_of_int}, but there is nothing`)
-    | Some(c) => c
-    }
-    let _ = y[instruct.to - 1]->Js.Array2.push(c)
-  }
+  let from = instruct.from - 1
+  let to = instruct.to - 1
+  let remaining = y[from]->Js.Array2.length - instruct.num
+  let to_move: array<container> =
+    y[from]->Js.Array2.slice(~start=remaining, ~end_=remaining + instruct.num)
+  y[from] = y[from]->Js.Array2.slice(~start=0, ~end_=remaining)
+  y[to] = y[to]->Js.Array2.concat(to_move)
   y
 }
 
+//Js.log(parsed_yard->string_of_yard)
+//Js.log(apply_instruction_9001(parsed_instructions[1], parsed_yard)->string_of_yard)
 let final_yard =
   parsed_instructions->Js.Array2.reduce((y, instr) => apply_instruction_9001(instr, y), parsed_yard)
 Js.log(final_yard->string_of_yard)
-Js.log(final_yard->top_of_yard)
+Js.log("Part 2: " ++ final_yard->top_of_yard)
