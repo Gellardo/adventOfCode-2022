@@ -78,6 +78,18 @@ let find_subdir = (fs, name): option<filesystem> => {
     ->Belt.Array.get(0)
   }
 }
+let rec total_size = fs => {
+  switch fs {
+  | File({size}) => size
+  | Dir({content}) => content->Js.Array2.reduce((acc, e) => acc + e->total_size, 0)
+  }
+}
+let rec flatten = (fs): array<filesystem> => {
+  switch fs {
+  | File(_) => [fs]
+  | Dir({content}) => content->Belt_Array.flatMap(entry => entry->flatten)->Js.Array2.concat([fs])
+  }
+}
 
 type state = {
   root: filesystem,
@@ -118,15 +130,56 @@ let apply_line = (l: line, s: state): state => {
 }
 
 let s = ref(start_state())
-s := apply_line(Cd({path: "/"}), s.contents)
-Js.log(s)
-s := apply_line(Dir({name: "asdf"}), s.contents)
-Js.log(s)
-s := apply_line(Cd({path: "asdf"}), s.contents)
-Js.log(s)
-s := apply_line(File({name: "file", size: 123}), s.contents)
-Js.log(s)
+let test_instructions = [
+  Cd({path: "/"}),
+  Dir({name: "asdf"}),
+  Cd({path: "asdf"}),
+  File({name: "file", size: 123}),
+  Cd({path: ".."}),
+]
+for i in 0 to test_instructions->Js.Array2.length - 1 {
+  s := apply_line(test_instructions[i], s.contents)
+  Js.log(s)
+}
 Js.log(s.contents.root->string_of_filesystem)
+Js.log(s.contents.root->total_size)
+Js.log(s.contents.root->flatten)
 
-let fs_after_session = parsed_lines->Js.Array2.reduce((s, l) => apply_line(l, s), start_state())
-Js.log(fs_after_session.root->string_of_filesystem)
+let fs_after_session =
+  parsed_lines->Js.Array2.reduce((s, l) => apply_line(l, s), start_state())->(s => s.root)
+let sum = arr => arr->Js_array2.reduce((acc, v) => acc + v, 0)
+let sum_small_dirs =
+  fs_after_session
+  ->flatten
+  ->Js.Array2.filter(fs =>
+    switch fs {
+    | File(_) => false
+    | Dir(_) => true
+    }
+  )
+  ->Js.Array2.map(fs => fs->total_size)
+  ->Js.Array2.filter(size => size <= 100000)
+  ->sum
+//Js.log(fs_after_session->string_of_filesystem)
+Js.log(`part 1: ${sum_small_dirs->string_of_int}`)
+
+let total_space = 70000000
+let required_space = 30000000
+// Find smallest dir that is big enough to open up enough space
+let remaining_space = total_space - fs_after_session->total_size
+
+Js.log(sum_small_dirs)
+let size_smalles_dir_to_delete =
+  fs_after_session
+  ->flatten
+  ->Js.Array2.filter(fs =>
+    switch fs {
+    | File(_) => false
+    | Dir(_) => true
+    }
+  )
+  ->Js.Array2.map(fs => fs->total_size)
+  ->Js.Array2.filter(size => required_space <= size + remaining_space)
+  ->Js.Array2.reduce((acc, size) => Js.Math.min_int(acc, size), total_space)
+
+Js.log(`part 2: ${size_smalles_dir_to_delete->string_of_int}`)
