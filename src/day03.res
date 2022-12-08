@@ -50,9 +50,8 @@ let find_duplicates = (arr: array<string>): array<int> =>
 let first_error = lines[0]->split_middle->find_duplicates
 Js.log(`first line: ${first_error->Js_array2.toString}`)
 
-let sum = arr => arr->Js_array2.reduce((acc, v) => acc + v, 0)
 let first_part =
-  lines->Js_array2.map(s => s->split_middle->find_duplicates)->Js_array2.map(sum)->sum
+  lines->Js_array2.map(s => s->split_middle->find_duplicates)->Js_array2.map(Utils.sum)->Utils.sum
 Js.log(`first part: ${first_part->string_of_int}`)
 
 let group_three = (arr: array<string>) => {
@@ -74,7 +73,11 @@ Js.log(
     ->Js_array2.toString}`,
 )
 let first_part =
-  lines->group_three->Js.Array2.map(arr => arr->find_duplicates)->Js_array2.map(sum)->sum
+  lines
+  ->group_three
+  ->Js.Array2.map(arr => arr->find_duplicates)
+  ->Js_array2.map(Utils.sum)
+  ->Utils.sum
 let before_sum = lines->group_three->Js.Array2.map(arr => arr->find_duplicates)
 let before_duplicates = lines->group_three
 Js.log(`after grouping: ${before_duplicates[0]->Js.Array2.toString}`)

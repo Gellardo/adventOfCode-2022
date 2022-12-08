@@ -69,8 +69,10 @@ Js.log(
     ->string_of_int}`,
 )
 let strategy = input->String.trim->Js_string2.split("\n")->Belt_Array.map(turn_of_string_p1)
-let sum = arr => arr->Js_array2.reduce((acc, v) => acc + v, 0)
-Js.log(`score of full strategy (part 1): ${strategy->Belt_Array.map(score)->sum->string_of_int}`)
+
+Js.log(
+  `score of full strategy (part 1): ${strategy->Belt_Array.map(score)->Utils.sum->string_of_int}`,
+)
 
 let outcome_of_string = s =>
   switch s {
@@ -90,5 +92,7 @@ let turn_of_string_p2 = s => {
   {opp, me}
 }
 let strategy = input->String.trim->Js_string2.split("\n")->Belt_Array.map(turn_of_string_p2)
-let sum = arr => arr->Js_array2.reduce((acc, v) => acc + v, 0)
-Js.log(`score of full strategy (part 2): ${strategy->Belt_Array.map(score)->sum->string_of_int}`)
+
+Js.log(
+  `score of full strategy (part 2): ${strategy->Belt_Array.map(score)->Utils.sum->string_of_int}`,
+)

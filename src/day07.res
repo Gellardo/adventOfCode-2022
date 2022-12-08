@@ -147,7 +147,7 @@ Js.log(s.contents.root->flatten)
 
 let fs_after_session =
   parsed_lines->Js.Array2.reduce((s, l) => apply_line(l, s), start_state())->(s => s.root)
-let sum = arr => arr->Js_array2.reduce((acc, v) => acc + v, 0)
+
 let sum_small_dirs =
   fs_after_session
   ->flatten
@@ -159,7 +159,7 @@ let sum_small_dirs =
   )
   ->Js.Array2.map(fs => fs->total_size)
   ->Js.Array2.filter(size => size <= 100000)
-  ->sum
+  ->Utils.sum
 //Js.log(fs_after_session->string_of_filesystem)
 Js.log(`part 1: ${sum_small_dirs->string_of_int}`)
 

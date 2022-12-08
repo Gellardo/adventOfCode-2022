@@ -63,9 +63,8 @@ let all_positions = grid => {
   }
   arr
 }
-let sum = arr => arr->Js_array2.reduce((acc, v) => acc + v, 0)
 let count_visible_from_outside = grid => {
-  grid->all_positions->Js.Array2.filter(p => p->is_visible(grid))->Js.Array2.map(_ => 1)->sum
+  grid->all_positions->Js.Array2.filter(p => p->is_visible(grid))->Js.Array2.map(_ => 1)->Utils.sum
 }
 Js.log(count_visible_from_outside(test_grid))
 Js.log(`part 1: ${count_visible_from_outside(grid)->string_of_int}`)
@@ -90,7 +89,6 @@ let num_trees_visible = (pos, grid, max_height, dir: direction): int => {
   | index => index + 1
   }
 }
-let mult = arr => arr->Js_array2.reduce((acc, v) => acc * v, 1)
 let scenic_score = (pos, grid): int => {
   let (x, y) = pos
   let height = grid[y][x]
@@ -100,13 +98,12 @@ let scenic_score = (pos, grid): int => {
     pos->num_trees_visible(grid, height, Up),
     pos->num_trees_visible(grid, height, Down),
   ]
-  visible_in_dir->mult
+  visible_in_dir->Utils.mult
 }
 Js.log(scenic_score((1, 1), test_grid))
 
-let max = arr => arr->Belt_Array.reduce(0, (max_v, v) => Js_math.max_int(max_v, v))
 let max_visible_from_inside = grid => {
-  grid->all_positions->Js.Array2.map(p => p->scenic_score(grid))->max
+  grid->all_positions->Js.Array2.map(p => p->scenic_score(grid))->Utils.max
 }
 Js.log(max_visible_from_inside(test_grid))
 Js.log(`part 2: ${max_visible_from_inside(grid)->string_of_int}`)
