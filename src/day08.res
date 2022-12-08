@@ -52,16 +52,61 @@ let is_visible = (pos, grid): bool => {
 let test_grid = [[1, 0, 1, 1], [0, 1, 1, 1], [1, 0, 1, 1], [1, 2, 1, 1]]
 Js.log(is_visible((1, 1), test_grid))
 
-let count_visible_from_outside = grid => {
-  let sum = ref(0)
+let all_positions = grid => {
+  let arr = []
   for i in 0 to grid->Js.Array2.length - 1 {
     for j in 0 to grid->Js.Array2.length - 1 {
       if (i, j)->is_visible(grid) {
-        sum := sum.contents + 1
+        let _ = arr->Js.Array2.push((i, j))
       }
     }
   }
-  sum.contents
+  arr
+}
+let sum = arr => arr->Js_array2.reduce((acc, v) => acc + v, 0)
+let count_visible_from_outside = grid => {
+  grid->all_positions->Js.Array2.filter(p => p->is_visible(grid))->Js.Array2.map(_ => 1)->sum
 }
 Js.log(count_visible_from_outside(test_grid))
 Js.log(`part 1: ${count_visible_from_outside(grid)->string_of_int}`)
+
+let num_trees_visible = (pos, grid, max_height, dir: direction): int => {
+  let (x, y) = pos
+  let tree_slice = switch dir {
+  | Left => grid[y]->Js.Array2.slice(~start=0, ~end_=x + 1)->Js.Array2.reverseInPlace
+  | Right => grid[y]->Js.Array2.slice(~start=x, ~end_=grid->Js.Array2.length)
+  | Up =>
+    grid
+    ->Belt.Array.map(yarr => yarr[x])
+    ->Js.Array2.slice(~start=0, ~end_=y + 1)
+    ->Js.Array2.reverseInPlace
+  | Down =>
+    grid->Belt.Array.map(yarr => yarr[x])->Js.Array2.slice(~start=y, ~end_=grid->Js.Array.length)
+  }
+  let first_larger_or_equal_tree: int =
+    tree_slice->Js.Array2.sliceFrom(1)->Js.Array2.findIndex(height => height >= max_height) // slice to exclude the tree itself
+  switch first_larger_or_equal_tree {
+  | -1 => tree_slice->Js.Array2.length - 1
+  | index => index + 1
+  }
+}
+let mult = arr => arr->Js_array2.reduce((acc, v) => acc * v, 1)
+let scenic_score = (pos, grid): int => {
+  let (x, y) = pos
+  let height = grid[y][x]
+  let visible_in_dir = [
+    pos->num_trees_visible(grid, height, Left),
+    pos->num_trees_visible(grid, height, Right),
+    pos->num_trees_visible(grid, height, Up),
+    pos->num_trees_visible(grid, height, Down),
+  ]
+  visible_in_dir->mult
+}
+Js.log(scenic_score((1, 1), test_grid))
+
+let max = arr => arr->Belt_Array.reduce(0, (max_v, v) => Js_math.max_int(max_v, v))
+let max_visible_from_inside = grid => {
+  grid->all_positions->Js.Array2.map(p => p->scenic_score(grid))->max
+}
+Js.log(max_visible_from_inside(test_grid))
+Js.log(`part 2: ${max_visible_from_inside(grid)->string_of_int}`)
